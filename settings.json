@@ -1,0 +1,35 @@
+{
+  "opacity": 0.97,
+  "audioBitrateKbps": 320,
+  "musicDir": "E:\\.meowhiks\\Scripts\\youtube-music-player\\music",
+  "ffmpegPath": "",
+  "animations": true,
+  "volume": 0.23,
+  "rpcDebug": true,
+  "lastPlayback": {
+    "videoId": "QLMEq-UI9s4",
+    "position": 83,
+    "updatedAt": 1760772065641
+  },
+  "aiEnabled": true,
+  "theme": {
+    "vars": {},
+    "elements": {}
+  },
+  "rpcEnabled": true,
+  "discordClientId": "1427937078225797170",
+  "rpcSmallPlay": "play",
+  "rpcSmallPause": "pause",
+  "rpcLargeImageKey": "app",
+  "lastPlayed": {
+    "videoId": "IeptoPCH7XY",
+    "positionSec": 35
+  },
+  "enableRPC": true,
+  "discord": {
+    "clientId": "1427937078225797170",
+    "largeImageKey": "app",
+    "smallImagePlay": "app",
+    "smallImagePause": "app"
+  }
+}

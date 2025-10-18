@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>YouTube Music Player</title>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    style-src 'self' 'unsafe-inline' https:;
+    img-src 'self' data: blob: https:;
+    font-src 'self' data: https:;
+    connect-src 'self' https:;
+    media-src 'self' file: blob: data: https:;
+    frame-src https:;
+  ">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="titlebar">
+    <div class="window-dots">
+      <button class="dot close btn-no-border shadowed" id="win-close" title="Закрыть"></button>
+      <button class="dot min btn-no-border shadowed" id="win-min" title="Свернуть"></button>
+      <button class="dot max btn-no-border shadowed" id="win-max" title="Развернуть"></button>
+    </div>
+    <div class="title">
+      <img src="./favicon.ico" class="app-icon" alt="icon" />
+      <span>YouTube Music Player</span>
+    </div>
+    <div class="title-actions">
+      <button class="btn btn-no-border shadowed" id="nav-back" title="Назад"><i class="fa-solid fa-arrow-left"></i></button>
+      <button class="btn btn-no-border shadowed" id="nav-fwd" title="Вперёд"><i class="fa-solid fa-arrow-right"></i></button>
+      <button class="btn btn-no-border shadowed" id="nav-home" title="Домой (YouTube)"><i class="fa-solid fa-house"></i></button>
+      <button class="btn btn-no-border shadowed" id="nav-reload" title="Обновить"><i class="fa-solid fa-rotate-right"></i></button>
+      <button class="btn btn-no-border shadowed" id="btn-settings" title="Настройки"><i class="fa-solid fa-gear"></i></button>
+    </div>
+  </div>
+
+  <div class="root">
+    <div class="content">
+      <aside class="sidebar">
+        <div class="header">
+          <h3>Навигация</h3>
+          <div class="side-actions">
+            <button class="btn btn-no-border shadowed" id="refresh-lib" title="Обновить медиатеку"><i class="fa-solid fa-rotate"></i></button>
+            <button class="btn btn-no-border shadowed" id="open-folder" title="Открыть папку музыки"><i class="fa-solid fa-folder-open"></i></button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tab-library"><i class="fa-solid fa-music"></i> Медиатека</button>
+          <button class="tab-btn" data-tab="tab-playlists"><i class="fa-solid fa-list"></i> Плейлисты</button>
+          <button class="tab-btn" data-tab="tab-queue"><i class="fa-solid fa-list-ol"></i> Очередь</button>
+          <button class="tab-btn" data-tab="tab-fav"><i class="fa-solid fa-star"></i> Избранное</button>
+        </div>
+
+        <div class="library-tools">
+          <input id="search" class="search underline" type="text" placeholder="Поиск..." />
+        </div>
+
+        <div class="panel-views">
+          <div id="tab-library" class="panel-view active">
+            <div id="library-list" class="library"></div>
+          </div>
+
+          <div id="tab-playlists" class="panel-view">
+            <div class="pl-actions">
+              <button class="btn" id="pl-create"><i class="fa-solid fa-plus"></i> Новый плейлист</button>
+            </div>
+            <div id="playlist-list" class="library"></div>
+            <div class="divider"></div>
+            <div id="playlist-tracks" class="library"></div>
+          </div>
+
+          <div id="tab-queue" class="panel-view">
+            <div class="pl-actions">
+              <button class="btn" id="queue-clear"><i class="fa-solid fa-broom"></i> Очистить очередь</button>
+              <button class="btn" id="queue-play"><i class="fa-solid fa-play"></i> Играть очередь</button>
+            </div>
+            <div id="queue-list" class="library"></div>
+          </div>
+
+          <div id="tab-fav" class="panel-view">
+            <div id="fav-list" class="library"></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <webview id="webview" src="https://www.youtube.com" allowpopups></webview>
+        <div id="status" class="status">Готово</div>
+      </main>
+    </div>
+
+    <footer class="player">
+      <div id="progress" class="progress"><div id="bar" class="bar" style="width:0%"></div></div>
+
+      <div class="meta">
+        <div class="titleline">
+          <button id="yt-link" class="yt-link-btn">Не воспроизводится</button>
+        </div>
+        <div id="time" class="time">0:00 / 0:00</div>
+      </div>
+
+      <div class="controls">
+        <div class="btns">
+          <button id="prev" class="btn btn-no-border shadowed toggleable" title="Предыдущий"><i class="fa-solid fa-backward-step"></i></button>
+          <button id="play" class="btn btn-no-border shadowed toggleable" title="Плей/Пауза"><i class="fa-solid fa-play"></i></button>
+          <button id="next" class="btn btn-no-border shadowed toggleable" title="Следующий"><i class="fa-solid fa-forward-step"></i></button>
+        </div>
+
+        <div class="volume">
+          <i class="fa-solid fa-volume-high"></i>
+          <input id="vol" type="range" min="0" max="100" value="100" class="range" />
+          <span id="volval">100%</span>
+        </div>
+      </div>
+
+      <audio id="audio"></audio>
+    </footer>
+  </div>
+
+  <aside id="settings" class="settings-drawer">
+    <div class="settings-header">
+      <div class="settings-title">Настройки</div>
+      <button class="btn btn-no-border shadowed" id="close-settings" title="Закрыть"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="settings-body">
+      <div class="setting">
+        <div class="label">Прозрачность окна</div>
+        <input id="opacity" type="range" min="60" max="100" value="100" />
+      </div>
+
+      <div class="setting">
+        <div class="label">Битрейт MP3</div>
+        <div class="select">
+          <select id="bitrate">
+            <option value="128">128 kbps</option>
+            <option value="192">192 kbps</option>
+            <option value="256">256 kbps</option>
+            <option value="320">320 kbps</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="setting">
+        <div class="label">Громкость (сохранённая)</div>
+        <input id="vol-settings" type="range" min="0" max="100" value="100" />
+      </div>
+
+      <div class="setting row">
+        <div>
+          <div class="label">Анимации</div>
+          <div class="sub">Градиенты и плавные переходы</div>
+        </div>
+        <label class="switch">
+          <input id="anim-toggle" type="checkbox" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting row">
+        <div>
+          <div class="label">ИИ для метаданных</div>
+          <div class="sub">Очистка названия/автора через OpenRouter</div>
+        </div>
+        <label class="switch">
+          <input id="ai-toggle" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting">
+        <div class="label">OpenRouter API Key</div>
+        <div class="sub">Ключ хранится локально в openrouter.key рядом с приложением, или используйте переменную окружения OPENROUTER_API_KEY</div>
+        <div class="grid2">
+          <input id="ai-key" type="password" class="textlike" placeholder="or_xxx..." />
+          <div class="item-actions">
+            <button class="btn" id="ai-save"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+            <button class="btn" id="ai-test"><i class="fa-solid fa-vial"></i> Проверить</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="setting">
+        <div class="label">Цветовая тема</div>
+        <div class="sub">Настройте палитру и ключевые элементы интерфейса</div>
+        <div class="grid2">
+          <div>
+            <div class="label">Основные</div>
+            <div class="grid2">
+              <label>Фон <input type="color" id="th-bg" /></label>
+              <label>Фон 2 <input type="color" id="th-bg2" /></label>
+              <label>Панель <input type="color" id="th-panel" /></label>
+              <label>Текст <input type="color" id="th-text" /></label>
+              <label>Muted <input type="color" id="th-muted" /></label>
+              <label>Акцент 1 <input type="color" id="th-accent" /></label>
+              <label>Акцент 2 <input type="color" id="th-accent2" /></label>
+              <label>Акцент тёмн. <input type="color" id="th-accent-dark" /></label>
+              <label>Бордер <input type="color" id="th-border" /></label>
+              <label>Warn <input type="color" id="th-warn" /></label>
+              <label>Yellow <input type="color" id="th-yellow" /></label>
+            </div>
+          </div>
+          <div>
+            <div class="label">Элементы</div>
+            <div class="grid2">
+              <label>Титлбар BG <input type="color" id="th-el-titlebar" /></label>
+              <label>Сайдбар BG <input type="color" id="th-el-sidebar" /></label>
+              <label>Плеер BG <input type="color" id="th-el-player" /></label>
+              <label>Прогресс A1 <input type="color" id="th-el-prog1" /></label>
+              <label>Прогресс A2 <input type="color" id="th-el-prog2" /></label>
+              <label>Кнопка BG <input type="color" id="th-el-btn" /></label>
+            </div>
+          </div>
+        </div>
+        <div class="item-actions" style="margin-top:8px;">
+          <button class="btn" id="theme-save"><i class="fa-solid fa-floppy-disk"></i> Сохранить тему</button>
+          <button class="btn" id="theme-reset"><i class="fa-solid fa-rotate-left"></i> Сбросить</button>
+          <button class="btn" id="theme-export"><i class="fa-solid fa-file-export"></i> Экспорт</button>
+          <button class="btn" id="theme-import"><i class="fa-solid fa-file-import"></i> Импорт</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="setting">
+        <div class="label">Статус</div>
+        <div class="status-list">
+          <div class="status-item">
+            <div class="status-key">FFmpeg</div>
+            <div class="status-val" id="st-ffmpeg">—</div>
+          </div>
+          <div class="status-item">
+            <div class="status-key">Музыка</div>
+            <div class="status-val" id="st-musicdir">—</div>
+          </div>
+          <div class="status-item">
+            <div class="status-key">ИИ</div>
+            <div class="status-val" id="st-ai">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="author">Автор — <a href="https://t.me/meowhiks" target="_blank" rel="noreferrer">@meowhiks</a></div>
+    </div>
+  </aside>
+
+  <script src="./renderer.js"></script>
+</body>
+</html>
